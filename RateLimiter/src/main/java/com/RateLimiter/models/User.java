@@ -18,5 +18,6 @@ public class User {
     private String userName;
     private String emailId;
     private String phoneNumber;
+    @JsonIgnore
     private String password;
 }
