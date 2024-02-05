@@ -2,7 +2,9 @@ package com.RateLimiter.controllers;
 
 import com.RateLimiter.dtos.CreateUserDTO;
 import com.RateLimiter.dtos.UserLoginDTO;
+import com.RateLimiter.models.UserResponse;
 import com.RateLimiter.services.UserService;
+import enums.UserResponseStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,24 +24,39 @@ public class UserController {
         this.userService = userService;
     }
 
-    @PostMapping("/register")
-    public ResponseEntity createUser(@RequestBody CreateUserDTO user) {
+    @PostMapping(value = "/register", produces = "application/json")
+    public ResponseEntity<UserResponse> createUser(@RequestBody CreateUserDTO user) {
+        UserResponse userResponse = new UserResponse();
         try {
             validateNewUser(user);
         } catch (Exception exception) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exception.getMessage());
+            userResponse.setStatus(UserResponseStatus.FAILURE);
+            userResponse.setMessage(exception.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(userResponse);
         }
-        return ResponseEntity.status(HttpStatus.CREATED).body(userService.createUser(user));
+        userService.createUser(user);
+        userResponse.setStatus(UserResponseStatus.SUCCESS);
+        return ResponseEntity.status(HttpStatus.CREATED).body(userResponse);
     }
 
-    @GetMapping("/login")
-    public ResponseEntity loginUser(@RequestBody UserLoginDTO user) {
+    @GetMapping(value = "/login", produces = "application/json")
+    public ResponseEntity<UserResponse> loginUser(@RequestBody UserLoginDTO user) {
+        UserResponse userResponse = new UserResponse();
         try {
             validateExistingUser(user);
         } catch (Exception exception) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exception.getMessage());
+            userResponse.setStatus(UserResponseStatus.FAILURE);
+            userResponse.setMessage(exception.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(userResponse);
         }
-        return ResponseEntity.status(HttpStatus.ACCEPTED).body(userService.loginUser(user));
+        Boolean userLoggedIn = userService.loginUser(user);
+        if (!userLoggedIn) {
+            userResponse.setStatus(UserResponseStatus.FAILURE);
+            userResponse.setMessage("Invalid user");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(userResponse);
+        }
+        userResponse.setStatus(UserResponseStatus.SUCCESS);
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(userResponse);
     }
 
     private void validateExistingUser(UserLoginDTO user) {
