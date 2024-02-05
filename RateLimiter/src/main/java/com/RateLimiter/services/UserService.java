@@ -33,9 +33,9 @@ public class UserService {
 
     public Boolean loginUser(UserLoginDTO user) {
         String emailId = user.getEmailId().trim();
-        User foundUser = userRepository.findByEmailId(emailId);
-        if (foundUser != null) {
-            return passwordMatches(user.getPassword(), foundUser.getPassword());
+        User matchedUser = userRepository.findByEmailId(emailId);
+        if (matchedUser != null) {
+            return passwordMatches(user.getPassword(), matchedUser.getPassword());
         }
         return false;
     }
