@@ -12,5 +12,5 @@ public class UserResponse {
     private UserResponseStatus Status;
 
     @JsonProperty("message")
-    private String message;
+    private String message = "";
 }
