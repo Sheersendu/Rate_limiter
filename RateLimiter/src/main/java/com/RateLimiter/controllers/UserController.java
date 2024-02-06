@@ -2,6 +2,7 @@ package com.RateLimiter.controllers;
 
 import com.RateLimiter.dtos.CreateUserDTO;
 import com.RateLimiter.dtos.UserLoginDTO;
+import com.RateLimiter.models.User;
 import com.RateLimiter.models.UserResponse;
 import com.RateLimiter.services.UserService;
 import enums.UserResponseStatus;
@@ -34,8 +35,9 @@ public class UserController {
             userResponse.setMessage(exception.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(userResponse);
         }
-        userService.createUser(user);
+        User createdUser = userService.createUser(user);
         userResponse.setStatus(UserResponseStatus.SUCCESS);
+        userResponse.setData(createdUser);
         return ResponseEntity.status(HttpStatus.CREATED).body(userResponse);
     }
 
