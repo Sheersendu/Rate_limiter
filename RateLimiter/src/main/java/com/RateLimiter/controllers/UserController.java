@@ -51,14 +51,31 @@ public class UserController {
             userResponse.setMessage(exception.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(userResponse);
         }
-        Boolean userLoggedIn = userService.loginUser(user);
-        if (!userLoggedIn) {
+        try {
+            User currentuser = userService.loginUser(user);
+            userResponse.setStatus(UserResponseStatus.SUCCESS);
+            return ResponseEntity.status(HttpStatus.ACCEPTED).body(userResponse);
+        } catch (Exception exception) {
             userResponse.setStatus(UserResponseStatus.FAILURE);
-            userResponse.setMessage("Invalid user");
+            userResponse.setMessage(exception.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(userResponse);
         }
-        userResponse.setStatus(UserResponseStatus.SUCCESS);
-        return ResponseEntity.status(HttpStatus.ACCEPTED).body(userResponse);
+
+    }
+
+    @GetMapping(value = "/details/{userName}", produces = "application/json")
+    public ResponseEntity<UserResponse> getUserDetails(@PathVariable String userName) {
+        UserResponse userResponse = new UserResponse();
+        try {
+            User user = userService.getUserDetails(userName);
+            userResponse.setData(user);
+            userResponse.setStatus(UserResponseStatus.SUCCESS);
+            return ResponseEntity.status(HttpStatus.ACCEPTED).body(userResponse);
+        } catch (Exception exception) {
+            userResponse.setStatus(UserResponseStatus.FAILURE);
+            userResponse.setMessage(exception.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(userResponse);
+        }
     }
 
     private void validateExistingUser(UserLoginDTO user) {

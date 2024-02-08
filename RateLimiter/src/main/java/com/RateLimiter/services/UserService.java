@@ -21,6 +21,8 @@ public class UserService {
     @Autowired
     private Jedis jedis;
 
+    private final Integer keyExpirationSeconds = 1800;
+
     @Autowired
     public UserService(UserRepository userRepository) {
         this.userRepository = userRepository;
@@ -39,13 +41,23 @@ public class UserService {
         return createdUser;
     }
 
-    public Boolean loginUser(UserLoginDTO user) {
+    public User loginUser(UserLoginDTO user) {
         String emailId = user.getEmailId().trim();
         User matchedUser = userRepository.findByEmailId(emailId);
-        if (matchedUser != null) {
-            return passwordMatches(user.getPassword(), matchedUser.getPassword());
+        if ((matchedUser == null) || (!passwordMatches(user.getPassword(), matchedUser.getPassword()))) {
+            throw new IllegalArgumentException("Invalid user");
         }
-        return false;
+        setRedisUserKey(matchedUser.getUserName());
+        return matchedUser;
+    }
+
+    public User getUserDetails(String userName) {
+        String trimmedUserName = userName.trim();
+        User user = userRepository.findByUserName(trimmedUserName);
+        if (user == null) {
+            throw new IllegalArgumentException(String.format("No user with username '%s' found", userName));
+        }
+        return user;
     }
 
     private void setRedisUserKey(String userName) {
@@ -55,5 +67,6 @@ public class UserService {
         userRateLimitingInfo.put("token", "10");
         userRateLimitingInfo.put("lastRequestTimestamp", String.valueOf(timestamp));
         this.jedis.hmset(userName, userRateLimitingInfo);
+        this.jedis.expire(userName, this.keyExpirationSeconds);
     }
 }
