@@ -19,7 +19,7 @@ public class RateLimiter {
         }
     }
 
-    private static boolean processUserRequest(String userName) {
+    public static boolean processUserRequest(String userName) {
         refreshToken(userName);
         int userTokens = Integer.parseInt(jedis.hget(userName, "token"));
         return userTokens > 0;
