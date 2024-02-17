@@ -8,9 +8,12 @@ import lombok.Setter;
 @NoArgsConstructor
 @Setter
 public class UserResponse {
-    @JsonProperty("Status")
-    private UserResponseStatus Status;
+    @JsonProperty("status")
+    private UserResponseStatus status;
+
+    @JsonProperty("data")
+    private User data = null;
 
     @JsonProperty("message")
-    private String message;
+    private String message = "";
 }
