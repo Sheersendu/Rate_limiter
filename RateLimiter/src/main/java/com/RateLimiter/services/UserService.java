@@ -11,6 +11,7 @@ import redis.clients.jedis.Jedis;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.RateLimiter.Utilities.Constants.*;
 import static com.RateLimiter.Utilities.PasswordEncoder.hashPassword;
 import static com.RateLimiter.Utilities.PasswordEncoder.passwordMatches;
 
@@ -20,8 +21,6 @@ public class UserService {
     private final UserRepository userRepository;
     @Autowired
     private Jedis jedis;
-
-    private final Integer keyExpirationSeconds = 1800;
 
     @Autowired
     public UserService(UserRepository userRepository) {
@@ -64,9 +63,9 @@ public class UserService {
         Map<String, String> userRateLimitingInfo = new HashMap<>() {
         };
         long timestamp = System.currentTimeMillis() / 1000;
-        userRateLimitingInfo.put("token", "10");
-        userRateLimitingInfo.put("lastRequestTimestamp", String.valueOf(timestamp));
+        userRateLimitingInfo.put(redisTokenKey, String.valueOf(redisTotalTokens));
+        userRateLimitingInfo.put(redisRequestTimestampKey, String.valueOf(timestamp));
         this.jedis.hmset(userName, userRateLimitingInfo);
-        this.jedis.expire(userName, this.keyExpirationSeconds);
+        this.jedis.expire(userName, redisKeyExpirationInSeconds);
     }
 }

@@ -7,10 +7,11 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class WebConfig {
+
     @Bean
-    public FilterRegistrationBean<RateLimitingFilter> rateLimitingFilter() {
+    public FilterRegistrationBean<RateLimitingFilter> rateLimitingFilterRegistrationBean(RateLimitingFilter rateLimitingFilter) {
         FilterRegistrationBean<RateLimitingFilter> registrationBean = new FilterRegistrationBean<>();
-        registrationBean.setFilter(new RateLimitingFilter());
+        registrationBean.setFilter(rateLimitingFilter);
         registrationBean.addUrlPatterns("/user/details/*"); // Add URL patterns for which the filter should be invoked
         return registrationBean;
     }
